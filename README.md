@@ -29,7 +29,7 @@ $ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certs/tls-key.ke
 Create k8s secret for certs:
 
 ```
-$ kubectl create secret tls tls-certificate --key ./certs/tls-key.key --cert ./certs/tls-cert.crt -l app=wpdemo
+$ kubectl create secret tls tls-certificate --key ./certs/tls-key.key --cert ./certs/tls-cert.crt
 $ kubectl label secret tls-certificate app=wpdemo
 ```
 
@@ -41,14 +41,33 @@ $ kubectl apply -f app-tier-deployment.yaml
 $ kubectl apply -f nginx-ingress.yaml
 ```
 
+Create local host for minikube.io domain (or edit it)
+- Adds minikube.io to /etc/hosts file with Minikube cluster ip
+- Example: 192.168.99.100  minikube.io
+
+To get cluster IP:
+```
+$ minikube ip //Get Kubernetes Cluster IP
+```
+
 Test it!
 ```
-$ minikube ip
-$ minukube dashboard //Check node resources
+$ minikube dashboard //Check cluster resources
 ```
+
+Access https://minikube.io
+
+Demo Wordpress Credentials:
+- username: admin
+- password: Demo12345!
 
 
 Delete all resources
 ```
 $ kubectl delete svc,pv,pvc,deployments,pods,secrets,ingress -l app=wpdemo
 ```
+
+### TODO:
+- Optimize NGINX Ingress configuration
+- Generate installation sh script
+- Configuration documentation

@@ -53,7 +53,7 @@ spec:
         - name: MARIADB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: dbpassword
+              name: mariadb
               key: root_password
         - name: MARIADB_USER
           value: wordpress
