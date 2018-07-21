@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  labels:
+    app: wpdemo
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  selector:
+    app: wpdemo
+    tier: frontend
+  type: NodePort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wp-pv-claim
+  labels:
+    app: wpdemo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wpdemo
+spec:
+  selector:
+    matchLabels:
+      app: wpdemo
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wpdemo
+        tier: frontend
+    spec:
+      containers:
+      - name: wordpress
+        image: bitnami/wordpress:latest
+        env:
+        - name: MARIADB_HOST
+          value: mariadb
+        - name: MARIADB_PORT
+          value: "3306"
+        - name: WORDPRESS_DATABASE_USER
+          value: wordpress
+        - name: WORDPRESS_DATABASE_NAME
+          value: wordpress
+        - name: WORDPRESS_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb
+              key: password
+        - name: WORDPRESS_USERNAME
+          value: admin
+        - name: WORDPRESS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress
+              key: password
+        - name: WORDPRESS_BLOG_NAME
+          value: WPDemo Blog
+        volumeMounts:
+        - name: wordpress-persistent-storage
+          mountPath: /bitnami/wordpress
+      volumes:
+      - name: wordpress-persistent-storage
+        persistentVolumeClaim:
+          claimName: wp-pv-claim
